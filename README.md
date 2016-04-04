@@ -8,11 +8,11 @@ Specifications:
 - GPU      : ARM Mali-400MP2
 - Memory   : 1GB or 2GB RAM
 - OS       : Android 5.1 (Android One)
-- Storage  : 16GB (Expendale up to 32GB)
+- Storage  : 16GB (Expendable up to 32GB)
 - Battery  : 2500 mAh
 - Display  : 5" 1280 x 720 px
 - Camera   : 8MPx with LED Flash & 2MPx Front
-- Colors:  : Black, White and Gold
+- Colors   : Black, White and Gold
 
 
 ![Infinix](http://infinixmobility.com/wp-content/uploads/images/x510-kv-1.jpg "Infinix Hot 2")
