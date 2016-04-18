@@ -1,6 +1,6 @@
 #If you import code, avoid mmcblk in mounts to avoid compatibility issues
 
-#device         fstype      mount point        [device2] [length=]
+#device         fstype      mount point        flags
 
 /boot			emmc	/dev/block/platform/mtk-msdc.0/by-name/boot		flags=display="Boot";backup=1
 /logo			emmc	/dev/block/platform/mtk-msdc.0/by-name/logo		flags=display="Logo";backup=1;flashimg=1
@@ -20,3 +20,4 @@
 /cache			ext4	/dev/block/platform/mtk-msdc.0/by-name/cache		flags=display="Cache";backup=1;wipeingui;wipeduringfactoryreset
 /data			ext4	/dev/block/platform/mtk-msdc.0/by-name/userdata		flags=forceencrypt=/dev/block/platform/mtk-msdc.0/by-name/metadata
 /external_sd		auto	/dev/block/mmcblk1p1	/dev/block/mmcblk1		flags=display="External SDcard";storage;wipeingui;removable;backup=0
+/usbotg			auto    /dev/block/sda1		/dev/block/sda			flags=display="Usb-Otg";storage;removable;backup=0
