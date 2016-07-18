@@ -4,12 +4,20 @@ import init.project.rc
 import init.ssd.rc
 import init.nvdata.rc
 import init.modem.rc
+import /init.mt6580.usb.rc
+
+on early-init
+    mount debugfs /sys/kernel/debug /sys/kernel/debug
+    setprop ro.mtk.hardware mt6580
 
 on init
-    export LD_PRELOAD "libxlog.so"
-
-    # By default, primary storage is physical
-    setprop ro.vold.primary_physical 1
+    export LD_PRELOAD "/system/lib/libxlog.so /system/lib/libmt6580.so"
+    
+    mkdir /protect_f 0771 system system
+    mkdir /protect_s 0771 system system
+    
+    # Change ION driver permission
+    chmod 0666 /dev/ion
 
 # See storage config details at http://source.android.com/tech/storage/
     mkdir /storage/sdcard 0555 root root
@@ -42,9 +50,6 @@ on init
 
     mkdir /mnt/cd-rom 0000 system system
 
-# Change ION driver permission
-    chmod 0644 /dev/ion
-
 #usbotg
     mkdir /mnt/media_rw/usbotg 0700 media_rw media_rw
     mkdir /storage/usbotg 0700 root root
@@ -67,9 +72,6 @@ on charger
 
 on fs
     write /proc/bootprof "INIT:Mount_START"
-    
-    mkdir /protect_f 0771 system system
-    mkdir /protect_s 0771 system system
     
     mount_all /fstab.mt6580
     exec /system/bin/tune2fs -O has_journal -u 10010 -r 4096 /dev/block/platform/mtk-msdc.0/by-name/userdata
