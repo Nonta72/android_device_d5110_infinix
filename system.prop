@@ -79,3 +79,6 @@ ril.radiooff.poweroffMD=0
 
 ro.telephony.ril_class=MediaTekRIL
 ro.telephony.ril.config=fakeiccid
+
+# Fix navbars buttons on HOT 2
+qemu.hw.mainkeys=0
