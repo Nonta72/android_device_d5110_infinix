@@ -1,3 +1,0 @@
-# Let netd access the interface
-allow netd wmtWifi_device:chr_file write;
-allow netd wmtWifi_device:chr_file open;
