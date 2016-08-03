@@ -10,23 +10,13 @@ on post-fs-data
 
     # Modem related device nodes
     mkdir /data/nvram/md  0770 root system
-    mkdir /data/nvram/md2 0770 root system
 
+#  Build-in Modified - S
+#    insmod /system/lib/modules/ccci_plat.ko
+#    insmod /system/lib/modules/ccci.ko
+#  Build-in Modified - E
+#   chown radio radio /sys/class/BOOT/BOOT/boot/md
     chown radio radio /sys/kernel/ccci/boot
-    
-    # xplod: this is not in the original mtk file... But I have no
-    # idea what kind of sorcery normally sets them
-    chown radio radio /dev/ccci_fs
-    chown radio radio /dev/ccci_ioctl0
-    chown radio radio /dev/ccci_ioctl1
-    chown radio radio /dev/ccci_ipc_1220_0
-    chown radio radio /dev/ccci_md_log_rx
-    chown radio radio /dev/ccci_md_log_tx
-    chown radio radio /dev/ccci_monitor
-    chown radio radio /dev/ccci_pcm_rx
-    chown radio radio /dev/ccci_pcm_tx
-    chown radio radio /dev/ccci_uem_rx
-    chown radio radio /dev/ccci_uem_tx
 
 #SeLinux
     mkdir /data/ccci_cfg 0770 system radio
@@ -101,12 +91,6 @@ service md_minilog_util /system/bin/md_minilog_util
 #  Modem related services (Begin)
 #
 
-#service permission_check /system/bin/permission_check
-#    class main
-#    user root
-#    group nvram
-#    oneshot
-
 service permission_check /system/bin/permission_check
     class main
     user root
@@ -178,4 +162,3 @@ service terservice /system/bin/terservice
 
 on property:ril.muxreport=1
     start muxreport-daemon
-
