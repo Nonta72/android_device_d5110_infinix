@@ -1,36 +1,23 @@
-Infinix Hot 2 X510 (Android One)
-===============================================
+This branch is for compiling cm-13.0 for the Infinix HOT 2
 
-Specifications:
---------------
-- CPU      : Mediatek MT6580 Quad-Core @ 1.3GHz
-- CPU ARCH : ARM CORTEX-A7
-- GPU      : ARM Mali-400MP2
-- Memory   : 1GB or 2GB RAM
-- OS       : Android 5.1 (Android One)
-- Storage  : 16GB (Expendable up to 32GB)
-- Battery  : 2500 mAh
-- Display  : 5" 1280 x 720 px
-- Camera   : 8MPx with LED Flash & 2MPx Front
-- Colors   : Black, White and Gold
+IMPORTANT:
+Device codename has been updated on this branch, meaning you need to update it locally too.
 
+cd cm-13.0 && cd device
+mkdir infinix && cd infinix
+git clone https://github.com/Nonta72/android_device_d5110_infinix.git -b cm-13.0 d5110
 
-![Infinix](http://infinixmobility.com/wp-content/uploads/images/x510-kv-1.jpg "Infinix Hot 2")
-
-
-Device Tree for compiling CyanogenMod 12.1
-
-
-Note:
-Before you compile, please take note of these
-- I have the 1GB RAM version
-- It came with Android One
-- I used kernel and boot.img details from Android One ROM but the partitions size are from Infinix ROM
-- If you have 2GB RAM version, you may need to adapt the code
-- Or if you want to use Android One partitions scheme, you need to adapt.
-
-
-Work in progress ...
-
-Will eat your cat !
-
+ETA:
+- Cyanogenmod 13.0 successfully compiled but it either stuck on bootanimation or on bootlogo (won't get to the bootanimation most of the cases). I hope some devs can help me make it boot, especially @Xen0n , @fire855 , @ferhung-mtk , @rohantaneja , @besik13 , @MSF-Jarvis , @HostZero
+- 
+Thanks to:
+Xen0n
+fire855
+ferhung-mtk
+rohantaneja
+besik13
+MSF-Jarvis
+HostZero
+Rendyindo
+hyperion70
+Whoever I forgot to mention
