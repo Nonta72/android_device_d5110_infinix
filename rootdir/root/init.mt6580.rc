@@ -1,30 +1,22 @@
 # MTK platform .rc configure
 
 import init.project.rc
+import /FWUpgradeInit.rc
+import init.xlog.rc
+import init.aee.rc
 import init.ssd.rc
+import init.no_ssd.rc
+import init.ssd_nomuser.rc
+import init.fon.rc
+import init.volte.rc
+import init.epdg.rc
 import init.nvdata.rc
+import init.trustonic.rc
+import init.mt6580.power.rc
 import init.modem.rc
-import /init.mt6580.usb.rc
-
-on early-init
-    mount debugfs /sys/kernel/debug /sys/kernel/debug
-    setprop ro.mtk.hardware mt6580
+import init.trace.rc
 
 on init
-    export LD_PRELOAD "/system/lib/libxlog.so /system/lib/libmt6580.so"
-    
-    mkdir /protect_f 0771 system system
-    mkdir /protect_s 0771 system system
-    
-    # Change ION driver permission
-    chmod 0666 /dev/ion
-
-# See storage config details at http://source.android.com/tech/storage/
-    mkdir /storage/sdcard 0555 root root
- 
-    # Support legacy paths
-    symlink storage/sdcard /sdcard
-    symlink storage/sdcard /mnt/sdcard
 
     # BATTERY proc
     chown shell system /proc/mtk_battery_cmd/current_cmd
@@ -45,10 +37,23 @@ on init
     symlink /dev/block/platform/mtk-msdc.0/by-name/logo /dev/logo
     symlink /dev/block/platform/mtk-msdc.0/by-name/misc2 /dev/misc2
 
+    mkdir /protect_f 0771 system system
+    mkdir /protect_s 0771 system system
     #create mountpoint for persist partition
     mkdir /persist 0771 system system
 
+
+# Create CIP mount point
+    mkdir /custom
+
     mkdir /mnt/cd-rom 0000 system system
+
+# Change ION driver permission
+    chmod 0666 /dev/ion
+
+# change lk_env permission
+    chown root system /proc/lk_env
+    chmod 0660 /proc/lk_env
 
 #usbotg
     mkdir /mnt/media_rw/usbotg 0700 media_rw media_rw
@@ -59,9 +64,6 @@ on charger
     mount ext4 /dev/block/platform/mtk-msdc.0/by-name/system /system ro wait
     mount ubifs ubi@system /system ro wait
     #mount ubifs ...
-    start drvbd
-    start ipod
-    start servicemanager
     start spm_script
     start fuelgauged
     start kpoc_charger
@@ -72,7 +74,6 @@ on charger
 
 on fs
     write /proc/bootprof "INIT:Mount_START"
-    
     mount_all /fstab.mt6580
     exec /system/bin/tune2fs -O has_journal -u 10010 -r 4096 /dev/block/platform/mtk-msdc.0/by-name/userdata
 
@@ -124,6 +125,12 @@ on post-fs
     chown root system /proc/mtprof/cputime
     chown root system /proc/mtprof/reboot_pid
 
+    chown system system /protect_f
+    chmod 0770 /protect_f
+
+    chown system system /protect_s
+    chmod 0770 /protect_s
+
     chown system system /persist
     chmod 0770 /persist
 
@@ -142,14 +149,13 @@ on post-fs-data
     #give system access to rfkill device node
     chmod 0660 /dev/rfkill
 
+    # create for muxd pts device node , to operate without root
     mkdir /dev/radio 0770 radio radio
 
     mkdir /data/drm/wv 0770 drm system
-    
-    mkdir /data/misc/gps 0770 gps gps
-    
+
     # GPS
-    chown system gps /dev/gps
+    mkdir /data/gps_mnl 0771 gps system
 
     # NFC
     mkdir /data/nfc_socket 0771 nfc radio
@@ -203,6 +209,12 @@ on post-fs-data
 
     # watch dog kicker
     write /proc/wdk "0 20 30"
+
+    # set ptmx group to non-root
+    chown root radio /dev/ptmx
+
+    # RTC
+    mkdir /data/misc/rtc 0770 system system
 
     # M4U
     #insmod /system/lib/modules/m4u.ko
@@ -515,9 +527,6 @@ on post-fs-data
 
     chmod 0660 /dev/sw_sync
     chown system graphics /dev/sw_sync
-    
-    chown system system /dev/rtc0
-    chmod 0660 /dev/rtc0
 
     # EM baseband file
     chown root diag /system/bin/baseband_regdump
@@ -622,6 +631,10 @@ on post-fs-data
     chown system camera /dev/DW9718AF
     chown system camera /dev/DW9814AF
     chown system camera /dev/CAM_CAL_DRV
+
+    #MATV
+    chmod 0660 /dev/MATV
+    chown system media /dev/MATV
 
     # otg_test
     chown root radio /dev/mt_otg_test
@@ -732,12 +745,6 @@ on boot
 
     write /proc/sys/vm/dirty_writeback_centisecs 300
     chmod 0660 /sys/power/autosleep
-    chmod 0660 /sys/power/state
-    chmod 0660 /sys/power/sb_state
-    chmod 0660 /sys/power/wake_lock
-    chmod 0660 /sys/power/wake_unlock
-    chmod 0770 /sys/power/tuxonice
-    chmod 0220 /sys/power/tuxonice/do_hibernate
 
     chmod 0664 /sys/class/leds/lcd-backlight/brightness
 
@@ -756,18 +763,21 @@ on boot
     chown system /sys/module/mlog/parameters/do_mlog
     chown system /sys/module/mlog/parameters/timer_intval
 
+    chown root   radio  /sys/class/leds/lcd-backlight/duty
+    chown root   radio  /sys/class/leds/lcd-backlight/div
+    chown system system /sys/class/leds/lcd-backlight/trigger
+    chown system system /sys/class/leds/button-backlight/trigger
+    chown system system /sys/class/leds/keyboard-backlight/trigger
+    chown system system /sys/class/leds/jogball-backlight/trigger
+    chown system system /sys/class/leds/red/trigger
+    chown system system /sys/class/leds/green/trigger
+    chown system system /sys/class/leds/blue/trigger
+
     # Permission for hibernation
     chown radio system /sys/power/tuxonice
     chown radio system /sys/power/tuxonice/do_hibernate
     chmod 0770 /sys/power/tuxonice
     chmod 0220 /sys/power/tuxonice/do_hibernate
-    
-    # TV-out
-    chmod 0664 /dev/TV-out
-
-    # HDMI
-    chown meida system /dev/hdmitx
-    chmod 0664 /dev/hdmitx
 
 # Smartbook Handler Framework
     chown system system /sys/power/sb_state
@@ -815,14 +825,15 @@ on boot
     chown shell system /proc/driver/wmt_dbg
     chown shell system /proc/driver/wmt_aee
 
+#Define device for ATCID
+    chmod 0660 /dev/ttyGS0
+    chown system /dev/ttyGS0
+    chmod 0660 /dev/ttyGS1
+    chown system /dev/ttyGS1
+
 # BT relayer mode used VCOM
     chmod 0660 /dev/ttyGS2
     chown bluetooth radio /dev/ttyGS2
-    
-    chown media media /dev/ccci_pcm_rx
-    chmod 0660 /dev/ccci_pcm_rx
-    chown media media /dev/ccci_pcm_tx
-    chmod 0660 /dev/ccci_pcm_tx
 
 # define device for EMCSMDLOGGER
     chmod 0660 /dev/ttyGS3
@@ -878,22 +889,6 @@ on property:persist.uartconsole.enable=1
 service bootlogoupdater /system/bin/boot_logo_updater
     class core
     oneshot
-    
-service wmtLoader /system/bin/logwrapper /system/bin/wmt_loader
-    user root
-    group root
-    class main
-    oneshot
-    
-service conn_launcher /system/bin/logwrapper /system/bin/6620_launcher -p /system/etc/firmware/
-    user system
-    group system
-    class core
-
-service mmc_ffu /system/bin/mmc_ffu do CS1_21.fluf /dev/block/mmcblk0 45 2020333330363030  2020323231323030
-    user root
-    class main
-    oneshot
 
 service mobile_log_d /system/bin/mobile_log_d
     class main
@@ -929,7 +924,7 @@ service netdiag /system/bin/netdiag
 service nvram_daemon /system/bin/nvram_daemon
     class main
     user root
-    group system root
+    group system
     oneshot
 
 # DFO (Begin)
@@ -1248,22 +1243,19 @@ service agpsd /system/bin/mtk_agpsd
     socket agpsd stream 660 gps system
     socket agpsd2 stream 660 gps inet
     socket agpsd3 stream 660 gps inet
-    user root
-    group gps ccci radio inet sdcard_r sdcard_rw misc
-    oneshot
+    user gps
+    group gps radio inet sdcard_r sdcard_rw misc
 
 service wifi2agps /system/bin/wifi2agps
     class main
-    user root
-    group gps ccci inet
-    oneshot
+    user wifi
+    group gps inet
 
 service mnld /system/xbin/mnld
     class main
-    user root
-    group ccci gps inet misc sdcard_rw sdcard_r media_rw system
+    user gps
+    group gps inet misc sdcard_rw sdcard_r media_rw system
     socket mnld stream 660 gps system
-    oneshot
 
 service ipod /system/bin/ipod
     user root
@@ -1444,25 +1436,24 @@ service shutdown /system/bin/shutdown
     user root
     group root
     disabled
-    
-service drvbd /system/bin/drvbd
-    class main
-    user root
-    group root
 
 service NvRAMAgent /system/bin/nvram_agent_binder
+    class main
     user system
-    group system nvram
-    
+    group system
+
 service thermal_manager /system/bin/thermal_manager
+    class main
     user root
     oneshot
 
 service thermal /system/bin/thermal
+    class main
     user system
     group system
 
 service thermald /system/bin/thermald
+    class main
     user system
     group system
 
@@ -1495,12 +1486,10 @@ service backuprestore /system/bin/br_app_data_service
 	socket backuprestore stream 0660 root sdcard_rw
 	user root
 
-service BGW /system/xbin/BGW
-	user root
-	group gps system radio
-	class main
-        oneshot
-
+#service BGW /system/xbin/BGW
+#	user system
+#	group gps system radio
+#	class main
 service MtkCodecService /system/bin/MtkCodecService
     class main
     user system
@@ -1545,55 +1534,3 @@ service ipo_swap /system/bin/ipo_swap
     user root
     group root
     oneshot
-    
-# Offline charging
-service ipod /system/bin/ipod
-    user root
-    group root
-    class ipo
-
-# CM Performance Profiles
-
-# Powersave
-on property:sys.perf.profile=0
-    write /sys/devices/system/cpu/cpu2/online "1"
-    write /sys/devices/system/cpu/cpu3/online "1"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq "1300000"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq "598000"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "powersave"
-    write /sys/devices/system/cpu/cpu4/online "0"
-    write /sys/devices/system/cpu/cpu5/online "0"
-    write /sys/devices/system/cpu/cpu6/online "0"
-    write /sys/devices/system/cpu/cpu7/online "0"
-
-# Balanced
-on property:sys.perf.profile=1
-    write /sys/devices/system/cpu/cpu2/online "1"
-    write /sys/devices/system/cpu/cpu3/online "1"
-    write /sys/devices/system/cpu/cpu4/online "1"
-    write /sys/devices/system/cpu/cpu5/online "1"
-    write /sys/devices/system/cpu/cpu6/online "1"
-    write /sys/devices/system/cpu/cpu7/online "1"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq "1664000"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq "598000"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "hotplug"
-
-# Performance
-on property:sys.perf.profile=2
-    write /sys/devices/system/cpu/cpu2/online "1"
-    write /sys/devices/system/cpu/cpu3/online "1"
-    write /sys/devices/system/cpu/cpu4/online "1"
-    write /sys/devices/system/cpu/cpu5/online "1"
-    write /sys/devices/system/cpu/cpu6/online "1"
-    write /sys/devices/system/cpu/cpu7/online "1"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq "1664000"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq "598000"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "performance"
-
-# Interactive
-on property:sys.perf.profile=1
-    write /sys/devices/system/cpu/cpu2/online "1"
-    write /sys/devices/system/cpu/cpu3/online "1"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq "1300000"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq "604500"
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "interactive"
